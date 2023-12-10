@@ -1,5 +1,5 @@
 // Navbar.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   Image,
@@ -25,11 +25,28 @@ const Navbar = ({navigation, searchQuery, setSearchQuery, projects}) => {
     setSearchQuery(text);
     console.log(searchQuery);
   };
-
+  useEffect(() => {
+    console.log(searchQuery); // Log updated searchQuery here
+  }, [searchQuery]);
   const signOut = () => {
-    Alert.alert('Are you sure want to logout');
-    navigation.navigate('login');
-    console.log(isSignOut);
+    Alert.alert(
+      'Delete Project',
+      `Are you sure you want to logout?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () => {
+            navigation.navigate('login');
+          },
+        },
+      ],
+      {cancelable: false},
+    );
   };
   return (
     <SafeAreaView style={styles.safeArea}>

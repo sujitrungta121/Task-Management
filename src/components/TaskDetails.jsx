@@ -7,16 +7,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import Task from './Task';
 import Dots from '../common/Dots';
 import DotFile from './DotFile';
 import filterIcon from '../assets/filter-icon.png';
 import upArrow from '../assets/up-arrow.png';
 import downArrow from '../assets/downArrow.png';
-import NewTask from './NewTask';
 import TaskNew from './TaskNew';
-import InputFile from './InputFile';
-import TomorrowTask from './InputFile';
+import TomorrowTask from './Tomorrow';
 
 const TaskDetails = ({heading, searchQuery, projects, setProjects}) => {
   const [clicked, setClicked] = useState(false);
@@ -148,14 +145,15 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   dotContainer: {
-    zIndex: 5,
+    zIndex: 20,
     position: 'absolute',
     top: 30,
     right: 5,
   },
   listItem: {
     paddingTop: 10,
-    // height: '100%',
+    overFlow: 'scroll',
+    zIndex: -1,
   },
   viewTodayButton: {
     flexDirection: 'row',

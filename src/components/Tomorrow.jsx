@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import Dots from '../common/Dots';
 import DotFile from './DotFile';
-import InputFile from './InputFile';
+import InputFile from './Tomorrow';
+import Menus from './Menu';
 
 const TomorrowTask = ({
   projects,
@@ -24,12 +25,11 @@ const TomorrowTask = ({
   const [isChecked, setIsChecked] = useState(false);
   const [inputText, setInputText] = useState('');
   const [clicked, setClicked] = useState(false);
-  const [checked, setChecked] = useState(false);
   const [openedDotFileIndex, setOpenedDotFileIndex] = useState(null);
   const [editTaskId, setEditTaskId] = useState(null);
-  const [highlightedTaskId, setHighlightedTaskId] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
-  const data = ['Move to Tomorrow', 'Highlights', 'Edit', 'Delete'];
+  const [visible, setVisible] = useState(false);
+  const data = ['Highlights', 'Edit', 'Delete'];
 
   const handleInputChange = text => {
     setInputText(text);
@@ -41,7 +41,7 @@ const TomorrowTask = ({
         id: Date.now(),
         task: inputText,
         isChecked: false,
-        dueDate: today, // Set the due date to tomorrow
+        dueDate: today,
       };
 
       const updatedProjects = [...projects];
@@ -75,16 +75,23 @@ const TomorrowTask = ({
     );
     if (
       projectIndex !== -1 &&
-      updatedProjects[projectIndex].todayTasks &&
-      updatedProjects[projectIndex].todayTasks.length > 0
+      updatedProjects[projectIndex].tomorrowTasks &&
+      updatedProjects[projectIndex].tomorrowTasks.length > 0
     ) {
-      const updatedTasks = [...updatedProjects[projectIndex].todayTasks];
+      const updatedTasks = [...updatedProjects[projectIndex].tomorrowTasks];
       const taskIndex = updatedTasks.findIndex(task => task.id === taskId);
       if (taskIndex !== -1) {
-        updatedTasks[taskIndex].isChecked = !updatedTasks[taskIndex].isChecked;
-        updatedProjects[projectIndex].todayTasks = updatedTasks;
+        updatedTasks[taskIndex].checkedIs = !updatedTasks[taskIndex].checkedIs;
+        updatedProjects[projectIndex].tomorrowTasks = updatedTasks;
         setProjects(updatedProjects);
       }
+    }
+  };
+  const handleInputSubmit = () => {
+    if (editTaskId !== null && inputText.trim() !== '') {
+      handleUpdateTask();
+    } else if (!editTaskId && inputText.trim() !== '') {
+      handleAddTask();
     }
   };
 
@@ -94,12 +101,14 @@ const TomorrowTask = ({
   const handleDotClick = index => {
     setOpenedDotFileIndex(index);
     setClicked(!clicked);
+    setVisible(!visible);
   };
 
   const handleFilterSelection = (filter, index) => {
     if (filter === 'Edit') {
       setEditTaskId(index);
-      setInputText(filteredTasks.find(task => task.id === index).task);
+      setInputText(filteredTasks.find(task => task.id === index)?.task || '');
+      console.log(inputText);
       handleFileVisible(false);
     } else if (filter === 'Delete') {
       const taskToDelete = filteredTasks.find(task => task.id === index);
@@ -107,14 +116,14 @@ const TomorrowTask = ({
         handleDeleteTask(project.name, taskToDelete.id);
       }
     } else if (filter === 'Highlights') {
-      if (!highlightedTaskId.includes(index)) {
-        setHighlightedTaskId([...highlightedTaskId, index]);
-        handleFileVisible(false);
-      } else if (highlightedTaskId.includes(index)) {
-        const updatedState = highlightedTaskId.filter(id => id !== index);
-        setHighlightedTaskId(updatedState);
-        handleFileVisible(false);
+      const updatedTasks = [...filteredTasks];
+      const taskIndex = updatedTasks.findIndex(task => task.id === index);
+      if (taskIndex !== -1) {
+        updatedTasks[taskIndex].highlightIs =
+          !updatedTasks[taskIndex].highlightIs;
+        setFilteredTasks(updatedTasks);
       }
+      handleFileVisible(false);
     } else if (filter === 'Move to Tomorrow') {
       console.log('move to tomorrow');
       handleFileVisible(false);
@@ -125,15 +134,6 @@ const TomorrowTask = ({
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // projects.forEach(project => {
-  //   project.tasks.forEach(task => {
-  //     if (task.dueDate.toDateString() === today.toDateString()) {
-  //       project.tasks.push(task);
-  //     } else if (task.dueDate.toDateString() === tomorrow.toDateString()) {
-  //       project.tomorrowTasks.push(task);
-  //     }
-  //   });
-  // });
   const project = projects.find(project => project.name === heading);
 
   useEffect(() => {
@@ -143,18 +143,16 @@ const TomorrowTask = ({
       if (filterType === 'Complete') {
         console.log('complete is clicked');
         tasks = projects.reduce((accumulator, project) => {
-          const tasksWithChecked = project.todayTasks.filter(
-            task => task.isChecked,
+          const tasksWithChecked = project.tomorrowTasks.filter(
+            task => task.checkedIs,
           );
           accumulator.push(...tasksWithChecked);
           return accumulator;
         }, []);
       } else if (filterType === 'OutStanding') {
-        tasks = project.todayTasks.filter(task =>
-          highlightedTaskId.includes(task.id),
-        );
+        tasks = project.tomorrowTasks.filter(task => task.highlightIs);
       } else {
-        tasks = project.todayTasks;
+        tasks = project.tomorrowTasks;
       }
 
       return tasks;
@@ -162,19 +160,19 @@ const TomorrowTask = ({
 
     const filtered = filterTasks();
     setFilteredTasks(filtered);
-  }, [projects, filterType, searchQuery, highlightedTaskId]);
+  }, [projects, filterType, searchQuery]);
 
   const handleUpdateTask = () => {
     if (inputText.trim() && editTaskId !== null) {
       const updatedProjects = projects.map(project => {
         if (project.name === heading) {
-          const updatedTasks = project.todayTasks.map(task => {
+          const updatedTasks = project.tomorrowTasks.map(task => {
             if (task.id === editTaskId) {
               return {...task, task: inputText};
             }
             return task;
           });
-          return {...project, todayTasks: updatedTasks};
+          return {...project, tomorrowTasks: updatedTasks};
         }
         return project;
       });
@@ -188,10 +186,10 @@ const TomorrowTask = ({
   const handleDeleteTask = (projectId, taskId) => {
     const updatedProjects = projects.map(project => {
       if (project.name === projectId) {
-        const updatedTasks = project.todayTasks.filter(
+        const updatedTasks = project.tomorrowTasks.filter(
           task => task.id !== taskId,
         );
-        return {...project, todayTasks: updatedTasks};
+        return {...project, tomorrowTasks: updatedTasks};
       }
       return project;
     });
@@ -200,38 +198,15 @@ const TomorrowTask = ({
   };
 
   return (
-    <View style={{height: '100%', maxHeight: 900}}>
-      {/* <View style={styles.inputBox}>
-        <View style={styles.firstBody}>
-          <TouchableOpacity
-            onPress={() => handleAddTask()}
-            accessible={true}
-            accessibilityRole={'checkbox'}
-            accessibilityState={{checked: checked}}>
-            <View style={[styles.checkBox, checked && styles.checkedBox]}>
-              {isChecked && <Text style={styles.tick}>&#10003;</Text>}
-            </View>
-          </TouchableOpacity>
-
-          <TextInput
-            style={[styles.box, isChecked ? styles.text : null]}
-            placeholder="Add New Task..."
-            onChangeText={handleInputChange}
-            value={inputText}
-          />
-        </View>
-      </View> */}
-
+    <View>
       <FlatList
         data={filteredTasks}
         keyExtractor={item => item.id.toString()}
-        contentContainerStyle={{flexGrow: 1}}
-        renderItem={({item}) => (
+        renderItem={({item, index}) => (
           <View
             style={[
               styles.tasksContainer,
-              highlightedTaskId.includes(item.id) &&
-                styles.highlightedTaskContainer,
+              item.highlightIs && styles.highlightedTaskContainer,
             ]}>
             <TouchableOpacity
               style={{
@@ -239,18 +214,17 @@ const TomorrowTask = ({
                 flexDirection: 'row',
                 columnGap: 20,
                 alignItems: 'center',
-                zIndex: 1,
               }}
               onPress={() => handleCheckBoxClick(project.name, item.id)}>
               <View
-                style={[styles.checkBox, item.isChecked && styles.checkedBox]}>
-                {item.isChecked && <Text style={styles.tick}>&#10003;</Text>}
+                style={[styles.checkBox, item.checkedIs && styles.checkedBox]}>
+                {item.checkedIs && <Text style={styles.tick}>&#10003;</Text>}
               </View>
               {!editTaskId || editTaskId !== item.id ? (
                 <Text
                   style={[
                     styles.taskText,
-                    item.isChecked && styles.lineThrough,
+                    item.checkedIs && styles.lineThrough,
                   ]}>
                   {item.task}
                 </Text>
@@ -260,21 +234,31 @@ const TomorrowTask = ({
                   value={inputText}
                   onChangeText={handleInputChange}
                   onBlur={handleUpdateTask}
+                  onSubmitEditing={handleInputSubmit}
                 />
               )}
             </TouchableOpacity>
 
-            <Pressable onPress={() => handleDotClick(item.id)}>
+            <Pressable
+              style={{position: 'relative'}}
+              onPress={() => {
+                console.log('clicked');
+                handleDotClick(item.id);
+              }}>
               <Dots />
             </Pressable>
 
             {clicked && openedDotFileIndex === item.id && (
-              <View style={styles.dotFileContainer}>
-                <DotFile
-                  data={data}
-                  onClick={filter => handleFilterSelection(filter, item.id)}
-                />
-              </View>
+              <Menus
+                visible={visible}
+                dotFileContainer={styles.dotFileContainer}
+                setVisible={setVisible}
+                data={data}
+                onClick={filter => {
+                  console.log('getting clicked');
+                  handleFilterSelection(filter, item.id, 'today');
+                }}
+              />
             )}
           </View>
         )}
@@ -337,15 +321,8 @@ const styles = StyleSheet.create({
   dotFileContainer: {
     position: 'absolute',
     top: '100%',
-    right: 0,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 12,
+    left: 10,
     zIndex: 20,
-    width: '50%',
-    padding: 8,
-    // height: '100%',
   },
   tasksContainer: {
     // position: 'relative',

@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Main from './src/components/main';
 import Projects from './src/components/Projects';
@@ -44,15 +44,15 @@ const App = () => {
         {
           id: 1,
           checkedIs: false,
-          isHighLight:false,
+          highlightIs:false,
          dueDate: specifiedDate,
-          task: 'Task 1',
+          task: 'Sujit',
          
         },
         {
           id: 2,
           checkedIs: false,
-          isHighLight:false,
+          highlightIs:false,
          dueDate: specifiedDate,
           task: 'Task 2',
          
@@ -60,7 +60,7 @@ const App = () => {
         {
           id: 3,
           checkedIs: false,
-          isHighLight:false,
+         highlightIs:false,
          dueDate: specifiedDate,
           task: 'Task 3',
           
@@ -102,7 +102,7 @@ const App = () => {
         {
           id: 1,
           checkedIs: false,
-          isHighLight:false,
+          highlightIs:false,
          dueDate: specifiedDate,
           task: 'Task 1',
          
@@ -110,7 +110,7 @@ const App = () => {
         {
           id: 2,
           checkedIs: false,
-          isHighLight:false,
+          highlightIs:false,
          dueDate: specifiedDate,
           task: 'Task 2',
          
@@ -118,7 +118,7 @@ const App = () => {
         {
           id: 3,
           checkedIs: false,
-          isHighLight:false,
+          highlightIs:false,
          dueDate: specifiedDate,
           task: 'Task 3',
           
@@ -155,32 +155,26 @@ const App = () => {
           task: 'Task 3',
         },
         
+        
       ],
       tomorrowTasks: [
         {
           id: 1,
           checkedIs: false,
-          isHighLight:false,
+          highlightIs:false,
          dueDate: specifiedDate,
-          task: 'Task 1',
+          task: 'Sujit',
          
         },
         {
           id: 2,
           checkedIs: false,
-          isHighLight:false,
+          highLightIs:false,
          dueDate: specifiedDate,
           task: 'Task 2',
          
         },
-        // {
-        //   id: 3,
-        //   isChecked: false,
-        //   isHighLight:false,
-        //  dueDate: specifiedDate,
-        //   task: 'Task 3',
-          
-        // },
+       
         
       ],
     

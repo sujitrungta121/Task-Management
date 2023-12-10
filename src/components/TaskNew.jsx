@@ -7,12 +7,14 @@ import {
   View,
   Pressable,
   Platform,
-  ScrollView,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import Dots from '../common/Dots';
-import DotFile from './DotFile';
-import InputFile from './InputFile';
+
+import Menus from './Menu';
+import {hp} from '../common/Responsive';
+import TomorrowTask from './Tomorrow';
 
 const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const [isChecked, setIsChecked] = useState(false);
@@ -21,8 +23,9 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const [checked, setChecked] = useState(false);
   const [openedDotFileIndex, setOpenedDotFileIndex] = useState(null);
   const [editTaskId, setEditTaskId] = useState(null);
-  const [highlightedTaskId, setHighlightedTaskId] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
+  const [visible, setVisible] = useState(false);
+
   const data = ['Move to Tomorrow', 'Highlights', 'Edit', 'Delete'];
 
   const handleInputChange = text => {
@@ -35,7 +38,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
         id: Date.now(),
         task: inputText,
         isChecked: false,
-        dueDate: today, // Set the due date to tomorrow
+        dueDate: today,
       };
 
       const updatedProjects = [...projects];
@@ -43,7 +46,6 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
         project => project.name === heading,
       );
       if (projectIndex !== -1) {
-        // Check if the task already exists before adding it
         const taskExists = updatedProjects[projectIndex].todayTasks.some(
           task =>
             task.task === newTask.task && task.dueDate === newTask.dueDate,
@@ -88,6 +90,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const handleDotClick = index => {
     setOpenedDotFileIndex(index);
     setClicked(!clicked);
+    setVisible(true);
   };
 
   const handleFilterSelection = (filter, index) => {
@@ -101,33 +104,29 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
         handleDeleteTask(project.name, taskToDelete.id);
       }
     } else if (filter === 'Highlights') {
-      if (!highlightedTaskId.includes(index)) {
-        setHighlightedTaskId([...highlightedTaskId, index]);
-        handleFileVisible(false);
-      } else if (highlightedTaskId.includes(index)) {
-        const updatedState = highlightedTaskId.filter(id => id !== index);
-        setHighlightedTaskId(updatedState);
-        handleFileVisible(false);
+      const updatedTasks = [...filteredTasks];
+      const taskIndex = updatedTasks.findIndex(task => task.id === index);
+      if (taskIndex !== -1) {
+        updatedTasks[taskIndex].isHighlight =
+          !updatedTasks[taskIndex].isHighlight;
+        setFilteredTasks(updatedTasks);
       }
+      handleFileVisible(false);
     } else if (filter === 'Move to Tomorrow') {
-      console.log('move to tomorrow');
+      const taskToMove = filteredTasks.find(task => task.id === index);
+      console.log(taskToMove);
+      if (taskToMove) {
+        handleMoveToTomorrow(taskToMove);
+      }
       handleFileVisible(false);
     }
   };
+
   const today = new Date();
   today.setDate(today.getDate() + 1);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // projects.forEach(project => {
-  //   project.tasks.forEach(task => {
-  //     if (task.dueDate.toDateString() === today.toDateString()) {
-  //       project.tasks.push(task);
-  //     } else if (task.dueDate.toDateString() === tomorrow.toDateString()) {
-  //       project.tomorrowTasks.push(task);
-  //     }
-  //   });
-  // });
   const project = projects.find(project => project.name === heading);
 
   useEffect(() => {
@@ -144,9 +143,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
           return accumulator;
         }, []);
       } else if (filterType === 'OutStanding') {
-        tasks = project.todayTasks.filter(task =>
-          highlightedTaskId.includes(task.id),
-        );
+        tasks = project.todayTasks.filter(task => task.isHighlight);
       } else {
         tasks = project.todayTasks;
       }
@@ -156,7 +153,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
 
     const filtered = filterTasks();
     setFilteredTasks(filtered);
-  }, [projects, filterType, searchQuery, highlightedTaskId]);
+  }, [projects, filterType, searchQuery]);
 
   const handleUpdateTask = () => {
     if (inputText.trim() && editTaskId !== null) {
@@ -179,6 +176,39 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
     }
   };
 
+  const handleMoveToTomorrow = task => {
+    const updatedProjects = projects.map(project => {
+      if (project.name === heading) {
+        const updatedTodayTasks = project.todayTasks.filter(
+          t => t.id !== task.id,
+        );
+
+        // Generate a new ID for the task being moved
+        const newId = Date.now(); // You can use another method to generate a unique ID
+
+        const updatedTomorrowTasks = [
+          ...project.tomorrowTasks,
+          {...task, id: newId, dueDate: tomorrow}, // Assign a new ID to the moved task
+        ];
+
+        return {
+          ...project,
+          todayTasks: updatedTodayTasks,
+          tomorrowTasks: updatedTomorrowTasks,
+        };
+      }
+      return project;
+    });
+
+    setProjects(updatedProjects);
+  };
+  const handleInputSubmit = () => {
+    if (editTaskId !== null && inputText.trim() !== '') {
+      handleUpdateTask();
+    } else if (!editTaskId && inputText.trim() !== '') {
+      handleAddTask();
+    }
+  };
   const handleDeleteTask = (projectId, taskId) => {
     const updatedProjects = projects.map(project => {
       if (project.name === projectId) {
@@ -194,7 +224,11 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   };
 
   return (
-    <View style={{height: '100%', maxHeight: 900}}>
+    <View
+      style={{
+        height: '100%',
+        gap: 10,
+      }}>
       <View style={styles.inputBox}>
         <View style={styles.firstBody}>
           <TouchableOpacity
@@ -212,68 +246,80 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
             placeholder="Add New Task..."
             onChangeText={handleInputChange}
             value={inputText}
+            onSubmitEditing={handleInputSubmit}
           />
         </View>
       </View>
-      <FlatList
-        data={filteredTasks}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={{flexGrow: 1}}
-        renderItem={({item}) => (
-          <View
-            style={[
-              styles.tasksContainer,
-              highlightedTaskId.includes(item.id) &&
-                styles.highlightedTaskContainer,
-            ]}>
-            <TouchableOpacity
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                columnGap: 20,
-                alignItems: 'center',
-                zIndex: 1,
-              }}
-              onPress={() => handleCheckBoxClick(project.name, item.id)}>
-              <View
-                style={[styles.checkBox, item.isChecked && styles.checkedBox]}>
-                {item.isChecked && <Text style={styles.tick}>&#10003;</Text>}
-              </View>
-              {!editTaskId || editTaskId !== item.id ? (
-                <Text
+      <ScrollView style={{maxHeight: hp(50)}}>
+        <FlatList
+          data={filteredTasks}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({item, index}) => (
+            <View
+              style={[
+                styles.tasksContainer,
+                item.isHighlight && styles.highlightedTaskContainer,
+              ]}>
+              <TouchableOpacity
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  columnGap: 20,
+                  alignItems: 'center',
+                }}
+                onPress={() => handleCheckBoxClick(project.name, item.id)}>
+                <View
                   style={[
-                    styles.taskText,
-                    item.isChecked && styles.lineThrough,
+                    styles.checkBox,
+                    item.isChecked && styles.checkedBox,
                   ]}>
-                  {item.task}
-                </Text>
-              ) : (
-                <TextInput
-                  style={styles.editInput}
-                  value={inputText}
-                  onChangeText={handleInputChange}
-                  onBlur={handleUpdateTask}
-                />
-              )}
-            </TouchableOpacity>
+                  {item.isChecked && <Text style={styles.tick}>&#10003;</Text>}
+                </View>
+                {!editTaskId || editTaskId !== item.id ? (
+                  <Text
+                    style={[
+                      styles.taskText,
+                      item.isChecked && styles.lineThrough,
+                    ]}>
+                    {item.task}
+                  </Text>
+                ) : (
+                  <TextInput
+                    style={styles.editInput}
+                    value={inputText}
+                    onChangeText={handleInputChange}
+                    onBlur={handleUpdateTask}
+                    onSubmitEditing={handleInputSubmit}
+                  />
+                )}
+              </TouchableOpacity>
 
-            <Pressable
-              style={{position: 'relative'}}
-              onPress={() => handleDotClick(item.id)}>
-              <Dots />
-            </Pressable>
+              <Pressable
+                style={{position: 'relative'}}
+                onPress={() => handleDotClick(item.id)}>
+                <Dots />
+              </Pressable>
 
-            {clicked && openedDotFileIndex === item.id && (
-              <View style={styles.dotFileContainer}>
-                <DotFile
+              {clicked && openedDotFileIndex === item.id && (
+                <Menus
+                  visible={visible}
+                  dotFileContainer={styles.dotFileContainer}
+                  setVisible={setVisible}
                   data={data}
                   onClick={filter => handleFilterSelection(filter, item.id)}
                 />
-              </View>
-            )}
-          </View>
-        )}
-      />
+              )}
+            </View>
+          )}
+        />
+        <TomorrowTask
+          projects={projects}
+          filterType={filterType}
+          setProjects={setProjects}
+          heading={heading}
+          searchQuery={searchQuery}
+        />
+      </ScrollView>
     </View>
   );
 };
@@ -294,6 +340,10 @@ const styles = StyleSheet.create({
   placeholder: {
     fontStyle: 'italic',
     fontSize: 20,
+  },
+  container: {
+    flex: 1,
+    padding: 10,
   },
   firstBody: {
     display: 'flex',
@@ -332,14 +382,8 @@ const styles = StyleSheet.create({
   dotFileContainer: {
     position: 'absolute',
     top: '100%',
-    right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 12,
-    zIndex: 9999,
-    width: '50%',
-    padding: 8,
+    left: 10,
+    zIndex: 20,
   },
   tasksContainer: {
     width: '100%',
@@ -350,7 +394,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 13,
-    zIndex: 0,
+    opacity: 5,
     marginTop: 20,
 
     ...Platform.select({
