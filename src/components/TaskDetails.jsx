@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   Image,
   Pressable,
@@ -8,17 +8,18 @@ import {
   View,
 } from 'react-native';
 import Dots from '../common/Dots';
-import DotFile from './DotFile';
+import DotFile from '../components/DotFile';
 import filterIcon from '../assets/filter-icon.png';
 import upArrow from '../assets/up-arrow.png';
 import downArrow from '../assets/downArrow.png';
 import TaskNew from './TaskNew';
-import TomorrowTask from './Tomorrow';
+import {hp} from '../common/Responsive';
 
 const TaskDetails = ({heading, searchQuery, projects, setProjects}) => {
   const [clicked, setClicked] = useState(false);
   const [today, setToday] = useState(true);
   const [filterType, setFilterType] = useState('All');
+  const tomorrowTasksRef = useRef(null);
   const months = [
     'Jan',
     'Feb',
@@ -40,10 +41,12 @@ const TaskDetails = ({heading, searchQuery, projects, setProjects}) => {
     setClicked(false);
   };
   const project = () => {
-    const projectnew = projects.filter(project => project.name === heading);
-    console.log(projectnew);
+    const projectnew = projects.filter(project => project.todoName === heading);
+
     return projectnew;
   };
+  if (!today && tomorrowTasksRef.current)
+    tomorrowTasksRef.current.scrollIntoView({behaviour: 'smooth'});
   const day = new Date();
   const date = day.getDate();
   const month = day.getMonth();
@@ -92,7 +95,6 @@ const TaskDetails = ({heading, searchQuery, projects, setProjects}) => {
         style={styles.viewTodayButton}
         onPress={() => {
           setToday(!today);
-          console.log(today);
         }}>
         <Text style={{color: 'white'}}>
           {today ? 'View Today' : 'View Tomorrow'}
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginHorizontal: 20,
     marginVertical: 10,
-    width: '40%',
+    width: hp(20),
     position: 'absolute',
     bottom: '1%',
     alignSelf: 'center',

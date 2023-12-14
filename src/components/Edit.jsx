@@ -1,29 +1,54 @@
 import React, {useState, useEffect} from 'react';
 import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
+import axios from 'axios';
 
-const Edit = ({open, data, setData, selectedProject}) => {
+const Edit = ({open, projects, setProjects, selectedProject}) => {
   const [editedProject, setEditedProject] = useState(selectedProject || '');
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
     const projectTasks =
-      data.find(proj => proj.name === selectedProject)?.tasks || [];
+      projects.find(proj => proj.name === selectedProject)?.tasks || [];
     setTasks(projectTasks);
-  }, [selectedProject, data]);
+  }, [selectedProject, projects]);
 
   const handleProject = project => {
     setEditedProject(project);
   };
 
-  const handleUpdateProject = () => {
+  const handleUpdateProject = async () => {
     if (editedProject.trim() !== '') {
-      const updatedData = data.map(project =>
-        project.name === selectedProject
-          ? {...project, name: editedProject, tasks: tasks}
-          : project,
-      );
-      setData(updatedData);
-      open(false);
+      try {
+        const index = projects.findIndex(
+          project => project.todoName === selectedProject,
+        );
+        const userId = projects[index].userId;
+        const todoId = projects[index]._id;
+
+        const response = await axios.patch(
+          'https://todo-backend-daem.vercel.app/update-todo',
+          {
+            userId: userId,
+            todoId: todoId,
+            todoName: editedProject,
+          },
+        );
+
+        const updatedData = response.data.todo;
+        setProjects(prevProjects => {
+          const updatedProjects = prevProjects.map(project => {
+            if (project._id === updatedData._id) {
+              return updatedData;
+            }
+            return project;
+          });
+          return updatedProjects;
+        });
+
+        open(false);
+      } catch (error) {
+        console.log('Error in updating', error);
+      }
     }
   };
 

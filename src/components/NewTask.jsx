@@ -34,7 +34,7 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
         id: Date.now(),
         task: inputText,
         isChecked: false,
-        dueDate: today, // Set the due date to tomorrow
+        dueDate: today,
       };
 
       const updatedProjects = [...projects];
@@ -42,7 +42,6 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
         project => project.name === heading,
       );
       if (projectIndex !== -1) {
-        // Check if the task already exists before adding it
         const taskExists = updatedProjects[projectIndex].tasks.some(
           task =>
             task.task === newTask.task && task.dueDate === newTask.dueDate,
@@ -53,9 +52,6 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
           setProjects(updatedProjects);
           setInputText('');
         } else {
-          // Task already exists, handle it as needed (maybe show an error message)
-          // For example:
-          console.log('Task already exists!');
         }
       }
     } else {
@@ -111,7 +107,6 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
         handleFileVisible(false);
       }
     } else if (filter === 'Move to Tomorrow') {
-      console.log('move to tomorrow');
       handleFileVisible(false);
     }
   };
@@ -120,15 +115,6 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // projects.forEach(project => {
-  //   project.tasks.forEach(task => {
-  //     if (task.dueDate.toDateString() === today.toDateString()) {
-  //       project.tasks.push(task);
-  //     } else if (task.dueDate.toDateString() === tomorrow.toDateString()) {
-  //       project.tomorrowTasks.push(task);
-  //     }
-  //   });
-  // });
   const project = projects.find(project => project.name === heading);
 
   useEffect(() => {
@@ -166,7 +152,7 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
         if (project.name === heading) {
           const updatedTasks = project.tasks.map(task => {
             if (task.id === editTaskId) {
-              return {...task, task: inputText}; // Update the task text
+              return {...task, task: inputText};
             }
             return task;
           });
@@ -176,7 +162,7 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
       });
 
       setProjects(updatedProjects);
-      setInputText(''); // Clear the inputText state after update
+      setInputText('');
       setEditTaskId(null);
     }
   };
@@ -192,7 +178,6 @@ const NewTask = ({projects, setProjects, heading, filterType, searchQuery}) => {
 
     setProjects(updatedProjects);
   };
-  // const filteredTasks = filterTasks();
 
   return (
     <View style={{height: '100%', maxHeight: 900}}>
@@ -340,10 +325,8 @@ const styles = StyleSheet.create({
     zIndex: 20,
     width: '50%',
     padding: 8,
-    // height: '100%',
   },
   tasksContainer: {
-    // position: 'relative',
     width: '100%',
     borderRadius: 10,
     backgroundColor: '#FFF',

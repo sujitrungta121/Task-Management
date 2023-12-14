@@ -1,4 +1,3 @@
-// Navbar.js
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
@@ -23,11 +22,8 @@ const Navbar = ({navigation, searchQuery, setSearchQuery, projects}) => {
 
   const handleInputChange = text => {
     setSearchQuery(text);
-    console.log(searchQuery);
   };
-  useEffect(() => {
-    console.log(searchQuery); // Log updated searchQuery here
-  }, [searchQuery]);
+  useEffect(() => {}, [searchQuery]);
   const signOut = () => {
     Alert.alert(
       'Delete Project',

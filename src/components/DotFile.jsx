@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
     padding: 30,
     width: '100%',
     borderRadius: 10,
-    // maxHeight: 500,
     zIndex: 20,
     overFlow: 'scroll',
   },

@@ -7,12 +7,9 @@ import {
   View,
   Pressable,
   Platform,
-  ScrollView,
   FlatList,
 } from 'react-native';
 import Dots from '../common/Dots';
-import DotFile from './DotFile';
-import InputFile from './Tomorrow';
 import Menus from './Menu';
 
 const TomorrowTask = ({
@@ -49,7 +46,6 @@ const TomorrowTask = ({
         project => project.name === heading,
       );
       if (projectIndex !== -1) {
-        // Check if the task already exists before adding it
         const taskExists = updatedProjects[projectIndex].todayTasks.some(
           task =>
             task.task === newTask.task && task.dueDate === newTask.dueDate,
@@ -60,7 +56,6 @@ const TomorrowTask = ({
           setProjects(updatedProjects);
           setInputText('');
         } else {
-          console.log('Task already exists!');
         }
       }
     } else {
@@ -108,7 +103,7 @@ const TomorrowTask = ({
     if (filter === 'Edit') {
       setEditTaskId(index);
       setInputText(filteredTasks.find(task => task.id === index)?.task || '');
-      console.log(inputText);
+
       handleFileVisible(false);
     } else if (filter === 'Delete') {
       const taskToDelete = filteredTasks.find(task => task.id === index);
@@ -125,7 +120,6 @@ const TomorrowTask = ({
       }
       handleFileVisible(false);
     } else if (filter === 'Move to Tomorrow') {
-      console.log('move to tomorrow');
       handleFileVisible(false);
     }
   };
@@ -141,7 +135,6 @@ const TomorrowTask = ({
       let tasks = [];
 
       if (filterType === 'Complete') {
-        console.log('complete is clicked');
         tasks = projects.reduce((accumulator, project) => {
           const tasksWithChecked = project.tomorrowTasks.filter(
             task => task.checkedIs,
@@ -242,20 +235,18 @@ const TomorrowTask = ({
             <Pressable
               style={{position: 'relative'}}
               onPress={() => {
-                console.log('clicked');
                 handleDotClick(item.id);
               }}>
               <Dots />
             </Pressable>
 
-            {clicked && openedDotFileIndex === item.id && (
+            {openedDotFileIndex === item.id && (
               <Menus
                 visible={visible}
                 dotFileContainer={styles.dotFileContainer}
                 setVisible={setVisible}
                 data={data}
                 onClick={filter => {
-                  console.log('getting clicked');
                   handleFilterSelection(filter, item.id, 'today');
                 }}
               />
@@ -325,7 +316,6 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   tasksContainer: {
-    // position: 'relative',
     width: '100%',
     borderRadius: 10,
     backgroundColor: '#FFF',

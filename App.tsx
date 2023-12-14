@@ -1,185 +1,36 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Main from './src/components/main';
 import Projects from './src/components/Projects';
 import LoginScreen from './src/components/Login';
 import SignupScreen from './src/components/SignUp';
+import axios from "axios";
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   const specifiedDate=new Date();
-  const [projects, setProjects] = useState([
-    {
-      name: 'Solar Project',
-     todayTasks: [
-        {
-          id: 1,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 1',
-         
-        },
-        {
-          id: 2,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 2',
-         
-        },
-        {
-          id: 3,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 3',
-          
-        },
-        
-      ],
-      tomorrowTasks: [
-        {
-          id: 1,
-          checkedIs: false,
-          highlightIs:false,
-         dueDate: specifiedDate,
-          task: 'Sujit',
-         
-        },
-        {
-          id: 2,
-          checkedIs: false,
-          highlightIs:false,
-         dueDate: specifiedDate,
-          task: 'Task 2',
-         
-        },
-        {
-          id: 3,
-          checkedIs: false,
-         highlightIs:false,
-         dueDate: specifiedDate,
-          task: 'Task 3',
-          
-        },
-        
-      ],
-    
-    },
-    {
-      name: 'Personal Project',
-     todayTasks: [
-        {
-          id: 1,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 1',
-        
-        },
-        {
-          id: 2,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 2',
-        
-        },
-        {
-          id: 3,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 3',
-       
-        },
-        
-      ],
-      tomorrowTasks: [
-        {
-          id: 1,
-          checkedIs: false,
-          highlightIs:false,
-         dueDate: specifiedDate,
-          task: 'Task 1',
-         
-        },
-        {
-          id: 2,
-          checkedIs: false,
-          highlightIs:false,
-         dueDate: specifiedDate,
-          task: 'Task 2',
-         
-        },
-        {
-          id: 3,
-          checkedIs: false,
-          highlightIs:false,
-         dueDate: specifiedDate,
-          task: 'Task 3',
-          
-        },
-        
-      ],
-    
-    },
-    {
-      name: 'My Project',
-     todayTasks: [
-        {
-          id: 1,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Sujit',
-        
-        },
 
-        {
-          id: 2,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 2',
+  const [apiData, setApiData] = useState([]);
+ 
 
-        },
-        {
-          id: 3,
-          isChecked: false,
-          isHighLight:false,
-         dueDate: specifiedDate,
-          task: 'Task 3',
-        },
-        
-        
-      ],
-      tomorrowTasks: [
-        {
-          id: 1,
-          checkedIs: false,
-          highlightIs:false,
-         dueDate: specifiedDate,
-          task: 'Sujit',
-         
-        },
-        {
-          id: 2,
-          checkedIs: false,
-          highLightIs:false,
-         dueDate: specifiedDate,
-          task: 'Task 2',
-         
-        },
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          'https://todo-backend-daem.vercel.app/get-all-todos/6576aaae6c2e044a510b424e',
+        ); 
        
-        
-      ],
-    
-    },
-  ]);
+        setApiData(response.data.todo);
+        // console.log("this is in the app side",response.data.todo); 
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -199,8 +50,8 @@ const App = () => {
           component={props => (
             <Main
               {...props}
-              projects={projects}
-              setProjects={setProjects}
+              projects={apiData}
+              setProjects={setApiData}
               navigation={props.navigation}
             />
           )}
@@ -212,8 +63,8 @@ const App = () => {
           component={props => (
             <Projects
               {...props}
-              projects={projects}
-              setProjects={setProjects}
+              projects={apiData}
+              setProjects={setApiData}
               navigation={props.navigation}
             />
           )}

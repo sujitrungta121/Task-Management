@@ -1,13 +1,14 @@
 import React, {useState} from 'react';
 import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
+import {hp, wp} from '../common/Responsive';
 
 const NewProject = ({onAddProject}) => {
   const [newProjectName, setNewProjectName] = useState('');
 
   const handleAddProject = () => {
     if (newProjectName.trim() !== '') {
-      onAddProject(newProjectName); // Pass the new project name to the parent component
-      setNewProjectName(''); // Clear the input after adding the project
+      onAddProject(newProjectName);
+      setNewProjectName('');
     }
   };
   return (
@@ -24,10 +25,10 @@ const NewProject = ({onAddProject}) => {
       </View>
       <Pressable
         style={{
-          backgroundColor: 'blue',
-          width: '40%',
-          padding: 5,
-          borderRadius: 10,
+          backgroundColor: '#0080FC',
+          width: wp(30),
+          padding: wp(2),
+          borderRadius: 15,
           justifyContent: 'center',
           alignItems: 'center',
         }}
@@ -48,14 +49,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
+    padding: wp(5),
     rowGap: 20,
   },
   input: {
-    width: '90%', // Adjust the width as needed
+    width: '90%',
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 10,
-    // padding: 5,
+    padding: 5,
   },
 });

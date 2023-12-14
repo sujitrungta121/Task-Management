@@ -1,10 +1,10 @@
-// Projects.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   Image,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -14,56 +14,47 @@ import DotFile from './DotFile';
 import arrow from '../assets/back-arrow.png';
 import Edit from './Edit';
 import NewProject from './NewProject';
+import axios from 'axios';
 
 const Projects = ({navigation, projects, setProjects}) => {
-  // const navigation=useNavigation();
-  // const [projects, setProjects] = useState([
-  //   {
-  //     name: 'Website Task',
-  //     tasks: [
-  //       {
-  //         id: 1,
-  //         dueDate: 'today',
-  //         task: 'task1',
-  //       },
-  //       {
-  //         id: 2,
-  //         dueDate: 'today',
-  //         task: 'task1',
-  //       },
-  //       {
-  //         id: 3,
-  //         dueDate: 'today',
-  //         task: 'task1',
-  //       },
-  //     ],
-  //   },
-  //   {name: 'Solar Project', tasks: ['Task 1']},
-  //   {name: 'Personal Project', tasks: ['Task 1', 'Task 2', 'Task 3']},
-  //   {name: 'Abc leads', tasks: []},
-  // ]);
   const [dotFileVisible, setDotFileVisible] = useState(false);
   const [openProjectIndex, setOpenProjectIndex] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProject, setSelectedProject] = useState('');
   const [openNew, setOpenNew] = useState(false);
+  const [apiData, setApiData] = useState([]);
+  const [postApiData, setPostApiData] = useState([]);
 
   const handleFileVisible = () => {
     setDotFileVisible(false);
   };
 
   const handleUpdateProjects = newData => {
-    setProjects(newData);
+    setProjects([...projects, newData]);
+  };
+  const handleDeleteProject = async index => {
+    try {
+      await axios.delete('https://todo-backend-daem.vercel.app/delete-todo', {
+        userId: projects[index].userId,
+        todoId: projects[index]._id,
+      });
+
+      const updatedProjects = projects.filter((_, i) => i !== index);
+      setProjects(updatedProjects);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    }
   };
 
   const handleFilterSelection = (filterType, index) => {
     if (filterType === 'Edit') {
       setModalVisible(true);
-      setSelectedProject(projects[index].name);
+
+      setSelectedProject(projects[index].todoName);
     } else if (filterType === 'Delete') {
       Alert.alert(
         'Delete Project',
-        `Are you sure you want to delete '${projects[index].name}'?`,
+        `Are you sure you want to delete '${projects[index].todoName}'?`,
         [
           {
             text: 'Cancel',
@@ -72,11 +63,7 @@ const Projects = ({navigation, projects, setProjects}) => {
           {
             text: 'Delete',
             style: 'destructive',
-            onPress: () => {
-              const updatedProjects = [...projects];
-              updatedProjects.splice(index, 1);
-              setProjects(updatedProjects);
-            },
+            onPress: () => handleDeleteProject(index),
           },
         ],
         {cancelable: false},
@@ -101,15 +88,30 @@ const Projects = ({navigation, projects, setProjects}) => {
   const closeNew = () => {
     setOpenNew(false);
   };
-  const handleAddNewProject = projectName => {
-    const newProject = {name: projectName, tasks: []};
-    setProjects([...projects, newProject]);
+  const handleAddNewProject = async projectName => {
+    const id = projects[0].userId;
+    try {
+      const response = await axios.post(
+        `http://todo-backend-daem.vercel.app/post-todo`,
+        {
+          userId: id,
+          todoName: projectName,
+        },
+      );
+      const newProject = response.data.todo;
+      const updatedProjects = [...projects];
+      updatedProjects.push({...newProject});
+      setProjects(updatedProjects);
+    } catch (error) {
+      console.log('errror in adding', error);
+    }
     setOpenNew(false);
   };
+
   const dotsData = ['Edit', 'Delete'];
 
   return (
-    <View style={styles.wrapper}>
+    <ScrollView style={styles.wrapper}>
       <View style={styles.header}>
         <Pressable
           onPress={() =>
@@ -120,21 +122,20 @@ const Projects = ({navigation, projects, setProjects}) => {
         <Text style={{color: '#0080FC', fontSize: 20}}>Projects</Text>
       </View>
       <View style={styles.projectDesc}>
-        {projects.map((project, index) => (
+        {projects?.map((project, index) => (
           <View style={styles.project} key={project.id}>
             <Pressable
               onPress={() => {
-                // console.log(project.name)
-                navigation.navigate('main', {projectName: project.name});
+                navigation.navigate('main', {projectName: project.todoName});
               }}>
-              <Text style={styles.projectText}>{project.name}</Text>
+              <Text style={styles.projectText}>{project.todoName}</Text>
             </Pressable>
             <Pressable
-              onPress={() => openDots(index)}
+              onPress={() => openDots(project._id)}
               style={{cursor: 'pointer'}}>
               <Dots />
             </Pressable>
-            {dotFileVisible && openProjectIndex === index && (
+            {dotFileVisible && openProjectIndex === project._id && (
               <View style={styles.dotFileWrapper}>
                 <DotFile
                   data={dotsData}
@@ -160,8 +161,8 @@ const Projects = ({navigation, projects, setProjects}) => {
           <View style={styles.modalContainer}>
             <Edit
               open={setModalVisible}
-              data={projects}
-              setData={handleUpdateProjects}
+              projects={projects}
+              setProjects={setProjects}
               selectedProject={selectedProject}
             />
           </View>
@@ -181,7 +182,7 @@ const Projects = ({navigation, projects, setProjects}) => {
           </View>
         </Modal>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -221,13 +222,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'relative', // Added position relative for parent container
+    position: 'relative',
   },
   dotFileWrapper: {
     position: 'absolute',
-    top: '100%', // Positioning the modal below the dots icon
+    top: '100%',
     right: 0,
     top: '56%',
-    zIndex: 1, // Ensure the modal is above other elements
+    zIndex: 1,
   },
 });
