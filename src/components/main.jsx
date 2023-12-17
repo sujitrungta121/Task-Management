@@ -3,7 +3,7 @@ import {SafeAreaView} from 'react-native';
 import Navbar from './Navbar';
 import TaskDetails from './TaskDetails';
 
-const Main = ({navigation, route, projects, setProjects}) => {
+const Main = ({navigation, route, projects, setProjects, id}) => {
   const {projectName} = route.params;
   const [searchQuery, setSearchQuery] = useState('');
   return (
@@ -16,6 +16,7 @@ const Main = ({navigation, route, projects, setProjects}) => {
       />
       <TaskDetails
         heading={projectName}
+        id={id}
         SearchQuery={searchQuery}
         projects={projects}
         setProjects={setProjects}

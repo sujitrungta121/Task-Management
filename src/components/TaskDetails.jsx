@@ -15,11 +15,10 @@ import downArrow from '../assets/downArrow.png';
 import TaskNew from './TaskNew';
 import {hp} from '../common/Responsive';
 
-const TaskDetails = ({heading, searchQuery, projects, setProjects}) => {
+const TaskDetails = ({heading, searchQuery, projects, setProjects, id}) => {
   const [clicked, setClicked] = useState(false);
   const [today, setToday] = useState(true);
   const [filterType, setFilterType] = useState('All');
-  const tomorrowTasksRef = useRef(null);
   const months = [
     'Jan',
     'Feb',
@@ -45,8 +44,8 @@ const TaskDetails = ({heading, searchQuery, projects, setProjects}) => {
 
     return projectnew;
   };
-  if (!today && tomorrowTasksRef.current)
-    tomorrowTasksRef.current.scrollIntoView({behaviour: 'smooth'});
+  // if (!today && tomorrowTasksRef.current)
+  //   tomorrowTasksRef.current.scrollIntoView({behaviour: 'smooth'});
   const day = new Date();
   const date = day.getDate();
   const month = day.getMonth();
@@ -84,6 +83,7 @@ const TaskDetails = ({heading, searchQuery, projects, setProjects}) => {
         <View style={styles.listItem}>
           <TaskNew
             heading={heading}
+            id={id}
             filterType={filterType}
             searchQuery={searchQuery}
             projects={projects}

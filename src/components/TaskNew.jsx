@@ -17,7 +17,14 @@ import {hp} from '../common/Responsive';
 import TomorrowTask from './Tomorrow';
 import axios from 'axios';
 
-const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
+const TaskNew = ({
+  projects,
+  setProjects,
+  heading,
+  filterType,
+  searchQuery,
+  id,
+}) => {
   const [isChecked, setIsChecked] = useState(false);
   const [inputText, setInputText] = useState('');
   const [clicked, setClicked] = useState(false);
@@ -35,26 +42,27 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
 
   const handleAddTask = async () => {
     const projectIndex = projects.findIndex(
-      project => project.todoName === heading,
+      project => project?.todoName === heading,
     );
 
-    const userId = projects[projectIndex].userId;
-    const todoId = projects[projectIndex]._id;
+    const userId = projects[projectIndex]?.userId;
+    const todoId = projects[projectIndex]?._id;
 
     if (inputText.trim()) {
       try {
         const response = await axios.post(
           'http://todo-backend-daem.vercel.app/post-task-by-todo',
           {
-            userId: userId,
+            userId: id,
             todoId: todoId,
             name: inputText,
           },
         );
-        const newTask = response.data.tasks;
+        const newTask = response.data.task;
 
         const updatedProjects = [...projects];
         updatedProjects[projectIndex].tasks.push(newTask);
+        console.log('This is the new Task', response.data);
         setProjects(updatedProjects);
         setInputText('');
       } catch (error) {
@@ -65,7 +73,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
     }
   };
 
-  const handleCheckBoxClick = (projectId, taskId, isChecke) => {
+  const handleCheckBoxClick = (projectId, taskId, event) => {
     const updatedProjects = [...projects];
     const projectIndex = updatedProjects.findIndex(
       project => project.todoName === projectId,
@@ -98,18 +106,18 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const handleFilterSelection = (filter, index) => {
     if (filter === 'Edit') {
       setEditTaskId(index);
-      setInputText(filteredTasks.find(task => task._id === index).name);
+      setInputText(filteredTasks.find(task => task?._id === index).name);
 
       handleFileVisible(false);
     } else if (filter === 'Delete') {
-      const taskToDelete = filteredTasks.find(task => task._id === index);
+      const taskToDelete = filteredTasks.find(task => task?._id === index);
 
       if (taskToDelete) {
-        handleDeleteTask(heading, taskToDelete._id);
+        handleDeleteTask(heading, taskToDelete?._id);
       }
     } else if (filter === 'Highlights') {
       const updatedTasks = [...filteredTasks];
-      const taskIndex = updatedTasks.findIndex(task => task._id === index);
+      const taskIndex = updatedTasks.findIndex(task => task?._id === index);
 
       if (taskIndex !== -1) {
         updatedTasks[taskIndex].ishighlight =
@@ -118,7 +126,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
       }
       handleFileVisible(false);
     } else if (filter === 'Move to Tomorrow') {
-      const taskToMove = filteredTasks.find(task => task.id === index);
+      const taskToMove = filteredTasks.find(task => task?.id === index);
 
       if (taskToMove) {
         handleMoveToTomorrow(taskToMove);
@@ -132,7 +140,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const project = projects.find(project => project.todoName === heading);
+  const project = projects.find(project => project?.todoName === heading);
 
   useEffect(() => {
     const filterTasks = () => {
@@ -140,14 +148,16 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
 
       if (filterType === 'Complete') {
         tasks = projects.reduce((accumulator, project) => {
-          const tasksWithChecked = project.tasks.filter(task => task.isChecked);
+          const tasksWithChecked = project?.tasks.filter(
+            task => task?.isChecked,
+          );
           accumulator.push(...tasksWithChecked);
           return accumulator;
         }, []);
       } else if (filterType === 'OutStanding') {
-        tasks = project.tasks.filter(task => task.ishighlight);
+        tasks = project?.tasks.filter(task => task?.ishighlight);
       } else {
-        tasks = project.tasks;
+        tasks = project?.tasks;
       }
 
       return tasks;
@@ -181,7 +191,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const handleMoveToTomorrow = task => {
     const updatedProjects = projects.map(project => {
       if (project.todoName === heading) {
-        const updatedTodayTasks = project.tasks.filter(t => t.id !== task.id);
+        const updatedTodayTasks = project?.tasks.filter(t => t.id !== task.id);
 
         const newId = Date.now();
 
@@ -211,7 +221,7 @@ const TaskNew = ({projects, setProjects, heading, filterType, searchQuery}) => {
   const handleDeleteTask = (projectId, taskId) => {
     const updatedProjects = projects.map(project => {
       if (project.todoName === projectId) {
-        const updatedTasks = project.tasks.filter(task => task._id !== taskId);
+        const updatedTasks = project.tasks.filter(task => task?._id !== taskId);
         return {...project, tasks: updatedTasks};
       }
       return project;

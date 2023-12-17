@@ -2,13 +2,12 @@ import React, {useState} from 'react';
 import {View, Text, TextInput, Button, StyleSheet, Alert} from 'react-native';
 import axios from 'axios';
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({navigation, setId}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const registerUser = () => {
     Alert.alert(
-      'Delete Project',
       `You are not registered. Do you want to register yourself?`,
       [
         {
@@ -29,16 +28,22 @@ const LoginScreen = ({navigation}) => {
 
   const handleLogin = async () => {
     if (password && email) {
+      console.log();
       try {
-        await axios.post('https://todo-backend-daem.vercel.app/login', {
-          email: email,
-          password: password,
-        });
+        const response = await axios.post(
+          'https://todo-backend-daem.vercel.app/login',
+          {
+            email: email,
+            password: password,
+          },
+        );
+        setId(response.data.user._id);
+        console.log('this is my user id', response.data.user._id);
         navigation.navigate('projects');
         setEmail('');
         setPassword('');
       } catch (error) {
-        console.error('Error during registration:', error.message);
+        console.error('Error during login:', error.message);
         registerUser();
       }
     } else {

@@ -16,7 +16,7 @@ import Edit from './Edit';
 import NewProject from './NewProject';
 import axios from 'axios';
 
-const Projects = ({navigation, projects, setProjects}) => {
+const Projects = ({navigation, projects, setProjects, id}) => {
   const [dotFileVisible, setDotFileVisible] = useState(false);
   const [openProjectIndex, setOpenProjectIndex] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -33,23 +33,29 @@ const Projects = ({navigation, projects, setProjects}) => {
     setProjects([...projects, newData]);
   };
   const handleDeleteProject = async index => {
+    console.log(index, projects[index]);
+    const Id = projects[index]._id;
+    console.log(Id, id);
     try {
       await axios.delete('https://todo-backend-daem.vercel.app/delete-todo', {
-        userId: projects[index].userId,
-        todoId: projects[index]._id,
+        data: {
+          userId: id,
+          todoId: Id,
+        },
       });
 
+      // console.log(response.data);
       const updatedProjects = projects.filter((_, i) => i !== index);
+      console.log(updatedProjects);
       setProjects(updatedProjects);
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error('Error deleting project:', error.message);
     }
   };
 
   const handleFilterSelection = (filterType, index) => {
     if (filterType === 'Edit') {
       setModalVisible(true);
-
       setSelectedProject(projects[index].todoName);
     } else if (filterType === 'Delete') {
       Alert.alert(
@@ -89,7 +95,6 @@ const Projects = ({navigation, projects, setProjects}) => {
     setOpenNew(false);
   };
   const handleAddNewProject = async projectName => {
-    const id = projects[0].userId;
     try {
       const response = await axios.post(
         `http://todo-backend-daem.vercel.app/post-todo`,
@@ -115,7 +120,13 @@ const Projects = ({navigation, projects, setProjects}) => {
       <View style={styles.header}>
         <Pressable
           onPress={() =>
-            navigation.navigate('main', {projectName: projects[0].name})
+            projects.length <= 0
+              ? Alert.alert(
+                  'There is no project to show please add a new Project',
+                )
+              : navigation.navigate('main', {
+                  projectName: projects[0]?.todoName,
+                })
           }>
           <Image source={arrow} />
         </Pressable>
@@ -162,6 +173,7 @@ const Projects = ({navigation, projects, setProjects}) => {
             <Edit
               open={setModalVisible}
               projects={projects}
+              id={id}
               setProjects={setProjects}
               selectedProject={selectedProject}
             />

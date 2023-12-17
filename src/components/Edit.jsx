@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import axios from 'axios';
 
-const Edit = ({open, projects, setProjects, selectedProject}) => {
+const Edit = ({open, projects, setProjects, selectedProject, id}) => {
   const [editedProject, setEditedProject] = useState(selectedProject || '');
   const [tasks, setTasks] = useState([]);
 
@@ -28,7 +28,7 @@ const Edit = ({open, projects, setProjects, selectedProject}) => {
         const response = await axios.patch(
           'https://todo-backend-daem.vercel.app/update-todo',
           {
-            userId: userId,
+            userId: id,
             todoId: todoId,
             todoName: editedProject,
           },

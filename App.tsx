@@ -13,13 +13,15 @@ const App = () => {
   const specifiedDate=new Date();
 
   const [apiData, setApiData] = useState([]);
+  const [id,setId]=useState();
  
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log(id);
       try {
         const response = await axios.get(
-          'https://todo-backend-daem.vercel.app/get-all-todos/6576aaae6c2e044a510b424e',
+          `https://todo-backend-daem.vercel.app/get-all-todos/${id}`,
         ); 
        
         setApiData(response.data.todo);
@@ -29,7 +31,7 @@ const App = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [id]);
 
   return (
     <NavigationContainer>
@@ -37,7 +39,13 @@ const App = () => {
         <Stack.Screen
           name="login"
           options={{headerShown: false}}
-          component={LoginScreen}
+          component={props => (
+            <LoginScreen
+              {...props}
+             setId={setId}
+              navigation={props.navigation}
+            />
+          )}
         />
         <Stack.Screen
           name="signup"
@@ -50,6 +58,7 @@ const App = () => {
           component={props => (
             <Main
               {...props}
+              id={id}
               projects={apiData}
               setProjects={setApiData}
               navigation={props.navigation}
@@ -63,6 +72,7 @@ const App = () => {
           component={props => (
             <Projects
               {...props}
+              id={id}
               projects={apiData}
               setProjects={setApiData}
               navigation={props.navigation}
