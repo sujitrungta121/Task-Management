@@ -9,9 +9,12 @@ import {
   Platform,
   FlatList,
   ScrollView,
+  Image,
 } from 'react-native';
 import Dots from '../common/Dots';
 
+import upArrow from '../assets/up-arrow.png';
+import downArrow from '../assets/downArrow.png';
 import Menus from './Menu';
 import {hp} from '../common/Responsive';
 import TomorrowTask from './Tomorrow';
@@ -23,7 +26,11 @@ const TaskNew = ({
   heading,
   filterType,
   searchQuery,
+  today,
+  setTomorrow,
+  tomorrow,
   id,
+  setToday,
 }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -33,14 +40,20 @@ const TaskNew = ({
   const [editTaskId, setEditTaskId] = useState(null);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [visible, setVisible] = useState(false);
-
+  const [changeText, setChangeText] = useState('');
+  const [task, setTask] = useState([]);
   const data = ['Move to Tomorrow', 'Highlights', 'Edit', 'Delete'];
 
   const handleInputChange = text => {
     setInputText(text);
   };
+  const todayDate = new Date();
+  todayDate.setDate(todayDate.getDate());
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(todayDate.getDate() + 1);
 
   const handleAddTask = async () => {
+    console.log(todayDate.toLocaleString(), tomorrowDate.toLocaleString());
     const projectIndex = projects.findIndex(
       project => project?.todoName === heading,
     );
@@ -56,13 +69,16 @@ const TaskNew = ({
             userId: id,
             todoId: todoId,
             name: inputText,
+            Date: today
+              ? todayDate.toLocaleString()
+              : tomorrowDate.toLocaleString(),
           },
         );
         const newTask = response.data.task;
 
         const updatedProjects = [...projects];
         updatedProjects[projectIndex].tasks.push(newTask);
-        console.log('This is the new Task', response.data);
+        console.log('This is the new Task', response.data.task.Date);
         setProjects(updatedProjects);
         setInputText('');
       } catch (error) {
@@ -74,6 +90,7 @@ const TaskNew = ({
   };
 
   const handleCheckBoxClick = (projectId, taskId, event) => {
+    console.log(today, 'before clicking');
     const updatedProjects = [...projects];
     const projectIndex = updatedProjects.findIndex(
       project => project.todoName === projectId,
@@ -88,9 +105,13 @@ const TaskNew = ({
       const taskIndex = updatedTasks.findIndex(task => task?._id === taskId);
       if (taskIndex !== -1) {
         updatedTasks[taskIndex].isChecked = !updatedTasks[taskIndex].isChecked;
-        updatedProjects[projectIndex].todayTasks = updatedTasks;
         setProjects(updatedProjects);
       }
+    }
+    console.log(today, 'after clicking');
+    if (!today) {
+      setToday(false);
+      console.log(today, tomorrow, 'after setting');
     }
   };
 
@@ -106,7 +127,8 @@ const TaskNew = ({
   const handleFilterSelection = (filter, index) => {
     if (filter === 'Edit') {
       setEditTaskId(index);
-      setInputText(filteredTasks.find(task => task?._id === index).name);
+      setChangeText(filteredTasks.find(task => task?._id === index).name);
+      console.log(changeText, 'This is in edit section');
 
       handleFileVisible(false);
     } else if (filter === 'Delete') {
@@ -126,19 +148,47 @@ const TaskNew = ({
       }
       handleFileVisible(false);
     } else if (filter === 'Move to Tomorrow') {
-      const taskToMove = filteredTasks.find(task => task?.id === index);
-
+      const taskToMove = filteredTasks.find(task => task?._id === index);
+      console.log(taskToMove, 'this si teh task to move');
       if (taskToMove) {
-        handleMoveToTomorrow(taskToMove);
+        handleMoveToTomorrow(taskToMove, index);
       }
       handleFileVisible(false);
     }
   };
 
-  const today = new Date();
-  today.setDate(today.getDate() + 1);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const dateString = todayDate;
+  const date = new Date(dateString);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const dateString1 = tomorrowDate;
+  const date1 = new Date(dateString);
+
+  const year1 = date.getFullYear();
+  const month1 = String(date.getMonth() + 1).padStart(2, '0');
+  const day1 = String(date.getDate()).padStart(2, '0');
+
+  const today1 = `${month}/${day}/${year}`;
+  const tomorrow1 = `${month1}/${day1}/${year1}`;
+  const dateStringNew = tomorrowDate;
+  const dateNew = new Date(dateStringNew);
+
+  const formattedDate =
+    ('0' + (dateNew.getMonth() + 1)).slice(-2) +
+    '/' +
+    ('0' + dateNew.getDate()).slice(-2) +
+    '/' +
+    dateNew.getFullYear() +
+    ', ' +
+    ('0' + dateNew.getHours()).slice(-2) +
+    ':' +
+    ('0' + dateNew.getMinutes()).slice(-2) +
+    ':' +
+    ('0' + dateNew.getSeconds()).slice(-2) +
+    ' ' +
+    (dateNew.getHours() >= 12 ? 'PM' : 'AM');
 
   const project = projects.find(project => project?.todoName === heading);
 
@@ -160,57 +210,125 @@ const TaskNew = ({
         tasks = project?.tasks;
       }
 
+      const currentDate = new Date();
+      const tomorrowDate = new Date();
+      tomorrowDate.setDate(currentDate.getDate() + 1);
+      const dateToCompare = today ? currentDate : tomorrowDate;
+      console.log(today, 'in today tomorrow task');
+      tasks = tasks.filter(task => {
+        const dateString = task?.Date;
+
+        const dateParts = dateString?.split('/');
+        if (dateParts) {
+          const month = parseInt(dateParts[0], 10);
+          const day = parseInt(dateParts[1], 10);
+          const year = parseInt(dateParts[2], 10);
+          return (
+            year === dateToCompare?.getFullYear() &&
+            month === dateToCompare?.getMonth() + 1 &&
+            day === dateToCompare?.getDate()
+          );
+        }
+      });
+
       return tasks;
     };
 
     const filtered = filterTasks();
     setFilteredTasks(filtered);
-  }, [projects, filterType, searchQuery]);
+  }, [projects, filterType, today]);
 
-  const handleUpdateTask = () => {
-    if (inputText.trim() && editTaskId !== null) {
+  const handleUpdateChange = text => {
+    console.log(text);
+    setChangeText(text);
+  };
+
+  const handleUpdateTask = async id => {
+    const taskToUpdate = filteredTasks.find(task => task._id === id);
+    if (!taskToUpdate) return;
+
+    try {
+      const response = await axios.patch(
+        `https://todo-backend-daem.vercel.app/update-task-by-todo/${id}`,
+        {
+          name: changeText,
+        },
+      );
       const updatedProjects = projects.map(project => {
         if (project.todoName === heading) {
           const updatedTasks = project.tasks.map(task => {
-            if (task._id === editTaskId) {
-              return {...task, task: inputText};
+            if (task._id === id) {
+              return {
+                ...task,
+                name: changeText,
+              };
             }
             return task;
           });
-          return {...project, tasks: updatedTasks};
+
+          return {
+            ...project,
+            tasks: updatedTasks,
+          };
         }
         return project;
       });
 
       setProjects(updatedProjects);
-      setInputText('');
       setEditTaskId(null);
+      setInputText('');
+      setChangeText('');
+
+      console.log('Task updated successfully:', response.data);
+    } catch (error) {
+      console.log('Error updating task:', error);
     }
   };
 
-  const handleMoveToTomorrow = task => {
-    const updatedProjects = projects.map(project => {
-      if (project.todoName === heading) {
-        const updatedTodayTasks = project?.tasks.filter(t => t.id !== task.id);
+  const handleMoveToTomorrow = async newTask => {
+    const taskId = newTask._id;
+    console.log(taskId);
 
-        const newId = Date.now();
+    try {
+      const response = await axios.patch(
+        `https://todo-backend-daem.vercel.app/update-task-by-todo/${taskId}`,
+        {
+          Date: formattedDate,
+        },
+      );
+      console.log(response.data.updatedTask);
+      const updatedTask = response.data.updatedTask;
+      const updatedProjects = projects.map(project => {
+        if (project.todoName === heading) {
+          const updatedTasks = project.tasks.map(task => {
+            if (task._id === newTask._id) {
+              return {
+                ...task,
+                Date: formattedDate,
+              };
+            }
+            return task;
+          });
 
-        const updatedTomorrowTasks = [
-          ...project.tomorrowTasks,
-          {...task, id: newId, dueDate: tomorrow},
-        ];
+          return {
+            ...project,
+            tasks: updatedTasks,
+          };
+        }
+        return project;
+      });
 
-        return {
-          ...project,
-          todayTasks: updatedTodayTasks,
-          tomorrowTasks: updatedTomorrowTasks,
-        };
-      }
-      return project;
-    });
+      setProjects(updatedProjects);
+      setEditTaskId(null);
+      setInputText('');
+      setChangeText('');
 
-    setProjects(updatedProjects);
+      console.log('Task moved to tomorrow:', updatedTask);
+    } catch (error) {
+      console.log('Error moving task to tomorrow:', error);
+    }
   };
+
   const handleInputSubmit = () => {
     if (editTaskId !== null && inputText.trim() !== '') {
       handleUpdateTask();
@@ -218,22 +336,35 @@ const TaskNew = ({
       handleAddTask();
     }
   };
-  const handleDeleteTask = (projectId, taskId) => {
-    const updatedProjects = projects.map(project => {
-      if (project.todoName === projectId) {
-        const updatedTasks = project.tasks.filter(task => task?._id !== taskId);
-        return {...project, tasks: updatedTasks};
-      }
-      return project;
-    });
-
-    setProjects(updatedProjects);
+  const handleDeleteTask = async (projectId, taskId) => {
+    try {
+      const response = await axios.delete(
+        `https://todo-backend-daem.vercel.app/delete-task-by-todo/${taskId}`,
+      );
+      console.log(response.data);
+      const updatedProjects = projects.map(project => {
+        if (project.todoName === projectId) {
+          const updatedTasks = project.tasks.filter(
+            task => task._id !== taskId,
+          );
+          return {...project, tasks: updatedTasks};
+        }
+        return project;
+      });
+      const updatedFilteredTasks = filteredTasks.filter(
+        task => task._id !== taskId,
+      );
+      setProjects(updatedProjects);
+      setFilteredTasks(updatedFilteredTasks);
+    } catch (error) {
+      console.log('Error in Deleting', error);
+    }
   };
 
   return (
     <View
       style={{
-        height: '100%',
+        // height: '100%',
         gap: 10,
       }}>
       <View style={styles.inputBox}>
@@ -295,10 +426,10 @@ const TaskNew = ({
                 ) : (
                   <TextInput
                     style={styles.editInput}
-                    value={inputText}
-                    onChangeText={handleInputChange}
-                    onBlur={handleUpdateTask}
-                    onSubmitEditing={handleInputSubmit}
+                    value={editTaskId === item._id ? changeText : item.name}
+                    onChangeText={handleUpdateChange}
+                    // onBlur={() => handleUpdateTask(item._id)}
+                    onSubmitEditing={() => handleUpdateTask(item._id)}
                   />
                 )}
               </TouchableOpacity>
@@ -311,6 +442,7 @@ const TaskNew = ({
 
               {openedDotFileIndex === item?._id && (
                 <Menus
+                  today={today}
                   visible={visible}
                   dotFileContainer={styles.dotFileContainer}
                   setVisible={setVisible}
@@ -320,6 +452,11 @@ const TaskNew = ({
               )}
             </View>
           )}
+        />
+
+        <TomorrowTask
+          filteredTask={filteredTasks}
+          setFilteredTask={setFilteredTasks}
         />
       </ScrollView>
     </View>
@@ -338,6 +475,21 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingLeft: 18,
     backgroundColor: '#E6E6EC',
+  },
+  viewTodayButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0080FC',
+    borderRadius: 24,
+    columnGap: 10,
+    padding: 12,
+    marginHorizontal: 20,
+    marginVertical: 10,
+    width: hp(24),
+    position: 'absolute',
+    bottom: '1%',
+    alignSelf: 'center',
   },
   placeholder: {
     fontStyle: 'italic',

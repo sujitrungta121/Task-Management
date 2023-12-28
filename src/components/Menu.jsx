@@ -3,11 +3,21 @@ import {View} from 'react-native';
 import {Menu, MenuItem} from 'react-native-material-menu';
 import {wp} from '../common/Responsive';
 
-const Menus = ({visible, setVisible, dotFileContainer, onClick, data}) => {
+const Menus = ({
+  visible,
+  setVisible,
+  dotFileContainer,
+  onClick,
+  data,
+  today,
+}) => {
   const hideMenu = filter => {
     setVisible(false);
     onClick(filter);
   };
+  const filteredData = today
+    ? data
+    : data.filter(item => item !== 'Move to Tomorrow');
 
   return (
     <View style={dotFileContainer}>
@@ -15,7 +25,7 @@ const Menus = ({visible, setVisible, dotFileContainer, onClick, data}) => {
         visible={visible}
         onRequestClose={() => setVisible(false)}
         style={{position: 'absolute', width: '30%', left: wp(65)}}>
-        {data.map((item, index) => (
+        {filteredData.map((item, index) => (
           <MenuItem key={index} onPress={() => hideMenu(item)}>
             {item}
           </MenuItem>

@@ -33,7 +33,7 @@ const NewProject = ({onAddProject}) => {
           alignItems: 'center',
         }}
         onPress={handleAddProject}>
-        <Text style={{fontSize: 16}}>Add New Task</Text>
+        <Text style={{fontSize: 12}}>Add New Task</Text>
       </Pressable>
     </View>
   );

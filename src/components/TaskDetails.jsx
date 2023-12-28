@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Image,
   Pressable,
@@ -18,6 +18,7 @@ import {hp} from '../common/Responsive';
 const TaskDetails = ({heading, searchQuery, projects, setProjects, id}) => {
   const [clicked, setClicked] = useState(false);
   const [today, setToday] = useState(true);
+  const [tomorrow, setTomorrow] = useState('');
   const [filterType, setFilterType] = useState('All');
   const months = [
     'Jan',
@@ -39,13 +40,13 @@ const TaskDetails = ({heading, searchQuery, projects, setProjects, id}) => {
     setFilterType(selectedFilter);
     setClicked(false);
   };
+
   const project = () => {
     const projectnew = projects.filter(project => project.todoName === heading);
 
     return projectnew;
   };
-  // if (!today && tomorrowTasksRef.current)
-  //   tomorrowTasksRef.current.scrollIntoView({behaviour: 'smooth'});
+
   const day = new Date();
   const date = day.getDate();
   const month = day.getMonth();
@@ -83,11 +84,15 @@ const TaskDetails = ({heading, searchQuery, projects, setProjects, id}) => {
         <View style={styles.listItem}>
           <TaskNew
             heading={heading}
+            setToday={setToday}
             id={id}
+            today={today}
             filterType={filterType}
             searchQuery={searchQuery}
             projects={projects}
             setProjects={setProjects}
+            setTomorrow={setTomorrow}
+            tomorrow={tomorrow}
           />
         </View>
       </View>
@@ -167,7 +172,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginHorizontal: 20,
     marginVertical: 10,
-    width: hp(20),
+    width: hp(24),
     position: 'absolute',
     bottom: '1%',
     alignSelf: 'center',

@@ -13,11 +13,14 @@ import Dots from '../common/Dots';
 import Menus from './Menu';
 
 const TomorrowTask = ({
-  projects,
-  setProjects,
+  // projects,
+  // setProjects,
+  // heading,
+  // filterType,
+  // searchQuery,
+  task,
+  setTask,
   heading,
-  filterType,
-  searchQuery,
 }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -28,178 +31,178 @@ const TomorrowTask = ({
   const [visible, setVisible] = useState(false);
   const data = ['Highlights', 'Edit', 'Delete'];
 
-  const handleInputChange = text => {
-    setInputText(text);
-  };
+  // const handleInputChange = text => {
+  //   setInputText(text);
+  // };
 
-  const handleAddTask = () => {
-    if (inputText.trim()) {
-      const newTask = {
-        id: Date.now(),
-        task: inputText,
-        isChecked: false,
-        dueDate: today,
-      };
+  // const handleAddTask = () => {
+  //   if (inputText.trim()) {
+  //     const newTask = {
+  //       id: Date.now(),
+  //       task: inputText,
+  //       isChecked: false,
+  //       dueDate: today,
+  //     };
 
-      const updatedProjects = [...projects];
-      const projectIndex = updatedProjects.findIndex(
-        project => project.name === heading,
-      );
-      if (projectIndex !== -1) {
-        const taskExists = updatedProjects[projectIndex].todayTasks.some(
-          task =>
-            task.task === newTask.task && task.dueDate === newTask.dueDate,
-        );
+  //     const updatedProjects = [...projects];
+  //     const projectIndex = updatedProjects.findIndex(
+  //       project => project.name === heading,
+  //     );
+  //     if (projectIndex !== -1) {
+  //       const taskExists = updatedProjects[projectIndex].todayTasks.some(
+  //         task =>
+  //           task.task === newTask.task && task.dueDate === newTask.dueDate,
+  //       );
 
-        if (!taskExists) {
-          updatedProjects[projectIndex].todayTasks.push(newTask);
-          setProjects(updatedProjects);
-          setInputText('');
-        } else {
-        }
-      }
-    } else {
-      setIsChecked(!isChecked);
-    }
-  };
+  //       if (!taskExists) {
+  //         updatedProjects[projectIndex].todayTasks.push(newTask);
+  //         setProjects(updatedProjects);
+  //         setInputText('');
+  //       } else {
+  //       }
+  //     }
+  //   } else {
+  //     setIsChecked(!isChecked);
+  //   }
+  // };
 
-  const handleCheckBoxClick = (projectId, taskId) => {
-    const updatedProjects = [...projects];
-    const projectIndex = updatedProjects.findIndex(
-      project => project.name === projectId,
-    );
-    if (
-      projectIndex !== -1 &&
-      updatedProjects[projectIndex].tomorrowTasks &&
-      updatedProjects[projectIndex].tomorrowTasks.length > 0
-    ) {
-      const updatedTasks = [...updatedProjects[projectIndex].tomorrowTasks];
-      const taskIndex = updatedTasks.findIndex(task => task.id === taskId);
-      if (taskIndex !== -1) {
-        updatedTasks[taskIndex].checkedIs = !updatedTasks[taskIndex].checkedIs;
-        updatedProjects[projectIndex].tomorrowTasks = updatedTasks;
-        setProjects(updatedProjects);
-      }
-    }
-  };
-  const handleInputSubmit = () => {
-    if (editTaskId !== null && inputText.trim() !== '') {
-      handleUpdateTask();
-    } else if (!editTaskId && inputText.trim() !== '') {
-      handleAddTask();
-    }
-  };
+  // const handleCheckBoxClick = (projectId, taskId) => {
+  //   const updatedProjects = [...projects];
+  //   const projectIndex = updatedProjects.findIndex(
+  //     project => project.name === projectId,
+  //   );
+  //   if (
+  //     projectIndex !== -1 &&
+  //     updatedProjects[projectIndex].tomorrowTasks &&
+  //     updatedProjects[projectIndex].tomorrowTasks.length > 0
+  //   ) {
+  //     const updatedTasks = [...updatedProjects[projectIndex].tomorrowTasks];
+  //     const taskIndex = updatedTasks.findIndex(task => task.id === taskId);
+  //     if (taskIndex !== -1) {
+  //       updatedTasks[taskIndex].checkedIs = !updatedTasks[taskIndex].checkedIs;
+  //       updatedProjects[projectIndex].tomorrowTasks = updatedTasks;
+  //       setProjects(updatedProjects);
+  //     }
+  //   }
+  // };
+  // const handleInputSubmit = () => {
+  //   if (editTaskId !== null && inputText.trim() !== '') {
+  //     handleUpdateTask();
+  //   } else if (!editTaskId && inputText.trim() !== '') {
+  //     handleAddTask();
+  //   }
+  // };
 
-  const handleFileVisible = () => {
-    setClicked(false);
-  };
-  const handleDotClick = index => {
-    setOpenedDotFileIndex(index);
-    setClicked(!clicked);
-    setVisible(!visible);
-  };
+  // const handleFileVisible = () => {
+  //   setClicked(false);
+  // };
+  // const handleDotClick = index => {
+  //   setOpenedDotFileIndex(index);
+  //   setClicked(!clicked);
+  //   setVisible(!visible);
+  // };
 
-  const handleFilterSelection = (filter, index) => {
-    if (filter === 'Edit') {
-      setEditTaskId(index);
-      setInputText(filteredTasks.find(task => task.id === index)?.task || '');
+  // const handleFilterSelection = (filter, index) => {
+  //   if (filter === 'Edit') {
+  //     setEditTaskId(index);
+  //     setInputText(filteredTasks.find(task => task.id === index)?.task || '');
 
-      handleFileVisible(false);
-    } else if (filter === 'Delete') {
-      const taskToDelete = filteredTasks.find(task => task.id === index);
-      if (taskToDelete) {
-        handleDeleteTask(project.name, taskToDelete.id);
-      }
-    } else if (filter === 'Highlights') {
-      const updatedTasks = [...filteredTasks];
-      const taskIndex = updatedTasks.findIndex(task => task.id === index);
-      if (taskIndex !== -1) {
-        updatedTasks[taskIndex].highlightIs =
-          !updatedTasks[taskIndex].highlightIs;
-        setFilteredTasks(updatedTasks);
-      }
-      handleFileVisible(false);
-    } else if (filter === 'Move to Tomorrow') {
-      handleFileVisible(false);
-    }
-  };
-  const today = new Date();
-  today.setDate(today.getDate() + 1);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  //     handleFileVisible(false);
+  //   } else if (filter === 'Delete') {
+  //     const taskToDelete = filteredTasks.find(task => task.id === index);
+  //     if (taskToDelete) {
+  //       handleDeleteTask(project.name, taskToDelete.id);
+  //     }
+  //   } else if (filter === 'Highlights') {
+  //     const updatedTasks = [...filteredTasks];
+  //     const taskIndex = updatedTasks.findIndex(task => task.id === index);
+  //     if (taskIndex !== -1) {
+  //       updatedTasks[taskIndex].highlightIs =
+  //         !updatedTasks[taskIndex].highlightIs;
+  //       setFilteredTasks(updatedTasks);
+  //     }
+  //     handleFileVisible(false);
+  //   } else if (filter === 'Move to Tomorrow') {
+  //     handleFileVisible(false);
+  //   }
+  // };
+  // const today = new Date();
+  // today.setDate(today.getDate() + 1);
+  // const tomorrow = new Date();
+  // tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const project = projects.find(project => project.name === heading);
+  // const project = projects.find(project => project.name === heading);
 
-  useEffect(() => {
-    const filterTasks = () => {
-      let tasks = [];
+  // useEffect(() => {
+  //   const filterTasks = () => {
+  //     let tasks = [];
 
-      if (filterType === 'Complete') {
-        tasks = projects.reduce((accumulator, project) => {
-          const tasksWithChecked = project.tomorrowTasks.filter(
-            task => task.checkedIs,
-          );
-          accumulator.push(...tasksWithChecked);
-          return accumulator;
-        }, []);
-      } else if (filterType === 'OutStanding') {
-        tasks = project.tomorrowTasks.filter(task => task.highlightIs);
-      } else {
-        tasks = project.tomorrowTasks;
-      }
+  //     if (filterType === 'Complete') {
+  //       tasks = projects.reduce((accumulator, project) => {
+  //         const tasksWithChecked = project.tomorrowTasks.filter(
+  //           task => task.checkedIs,
+  //         );
+  //         accumulator.push(...tasksWithChecked);
+  //         return accumulator;
+  //       }, []);
+  //     } else if (filterType === 'OutStanding') {
+  //       tasks = project.tomorrowTasks.filter(task => task.highlightIs);
+  //     } else {
+  //       tasks = project.tomorrowTasks;
+  //     }
 
-      return tasks;
-    };
+  //     return tasks;
+  //   };
 
-    const filtered = filterTasks();
-    setFilteredTasks(filtered);
-  }, [projects, filterType, searchQuery]);
+  //   const filtered = filterTasks();
+  //   setFilteredTasks(filtered);
+  // }, [projects, filterType, searchQuery]);
 
-  const handleUpdateTask = () => {
-    if (inputText.trim() && editTaskId !== null) {
-      const updatedProjects = projects.map(project => {
-        if (project.name === heading) {
-          const updatedTasks = project.tomorrowTasks.map(task => {
-            if (task.id === editTaskId) {
-              return {...task, task: inputText};
-            }
-            return task;
-          });
-          return {...project, tomorrowTasks: updatedTasks};
-        }
-        return project;
-      });
+  // const handleUpdateTask = () => {
+  //   if (inputText.trim() && editTaskId !== null) {
+  //     const updatedProjects = projects.map(project => {
+  //       if (project.name === heading) {
+  //         const updatedTasks = project.tomorrowTasks.map(task => {
+  //           if (task.id === editTaskId) {
+  //             return {...task, task: inputText};
+  //           }
+  //           return task;
+  //         });
+  //         return {...project, tomorrowTasks: updatedTasks};
+  //       }
+  //       return project;
+  //     });
 
-      setProjects(updatedProjects);
-      setInputText('');
-      setEditTaskId(null);
-    }
-  };
+  //     setProjects(updatedProjects);
+  //     setInputText('');
+  //     setEditTaskId(null);
+  //   }
+  // };
 
-  const handleDeleteTask = (projectId, taskId) => {
-    const updatedProjects = projects.map(project => {
-      if (project.name === projectId) {
-        const updatedTasks = project.tomorrowTasks.filter(
-          task => task.id !== taskId,
-        );
-        return {...project, tomorrowTasks: updatedTasks};
-      }
-      return project;
-    });
+  // const handleDeleteTask = (projectId, taskId) => {
+  //   const updatedProjects = projects.map(project => {
+  //     if (project.name === projectId) {
+  //       const updatedTasks = project.tomorrowTasks.filter(
+  //         task => task.id !== taskId,
+  //       );
+  //       return {...project, tomorrowTasks: updatedTasks};
+  //     }
+  //     return project;
+  //   });
 
-    setProjects(updatedProjects);
-  };
+  //   setProjects(updatedProjects);
+  // };
 
   return (
     <View>
       <FlatList
-        data={filteredTasks}
-        keyExtractor={item => item.id.toString()}
+        data={task}
+        keyExtractor={item => item?._id.toString()}
         renderItem={({item, index}) => (
           <View
             style={[
               styles.tasksContainer,
-              item.highlightIs && styles.highlightedTaskContainer,
+              // item.highlightIs && styles.highlightedTaskContainer,
             ]}>
             <TouchableOpacity
               style={{
@@ -208,18 +211,22 @@ const TomorrowTask = ({
                 columnGap: 20,
                 alignItems: 'center',
               }}
-              onPress={() => handleCheckBoxClick(project.name, item.id)}>
+              // onPress={() => handleCheckBoxClick(project.name, item.id)}
+            >
               <View
-                style={[styles.checkBox, item.checkedIs && styles.checkedBox]}>
-                {item.checkedIs && <Text style={styles.tick}>&#10003;</Text>}
+              // style={[styles.checkBox, item.checkedIs && styles.checkedBox]}
+              >
+                {/* {item.checkedIs &&  */}
+                <Text style={styles.tick}>&#10003;</Text>
+                {/* } */}
               </View>
-              {!editTaskId || editTaskId !== item.id ? (
+              {!editTaskId || editTaskId !== item?._id ? (
                 <Text
                   style={[
                     styles.taskText,
-                    item.checkedIs && styles.lineThrough,
+                    // item.checkedIs && styles.lineThrough,
                   ]}>
-                  {item.task}
+                  {item?.name}
                 </Text>
               ) : (
                 <TextInput
@@ -235,7 +242,7 @@ const TomorrowTask = ({
             <Pressable
               style={{position: 'relative'}}
               onPress={() => {
-                handleDotClick(item.id);
+                // handleDotClick(item.id);
               }}>
               <Dots />
             </Pressable>
@@ -247,7 +254,7 @@ const TomorrowTask = ({
                 setVisible={setVisible}
                 data={data}
                 onClick={filter => {
-                  handleFilterSelection(filter, item.id, 'today');
+                  // handleFilterSelection(filter, item.id, 'today');
                 }}
               />
             )}
