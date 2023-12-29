@@ -11,7 +11,9 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
+import SyncStorage from 'sync-storage';
 import Dots from '../common/Dots';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import upArrow from '../assets/up-arrow.png';
 import downArrow from '../assets/downArrow.png';
@@ -52,6 +54,15 @@ const TaskNew = ({
   const tomorrowDate = new Date(todayDate);
   tomorrowDate.setDate(todayDate.getDate() + 1);
 
+  const storeData = async () => {
+    try {
+      await AsyncStorage.setItem('today', JSON.stringify(today)); // Replace '@key' with your desired key
+      console.log('Data stored successfully!');
+    } catch (error) {
+      console.log('Error storing data:', error);
+    }
+  };
+
   const handleAddTask = async () => {
     console.log(todayDate.toLocaleString(), tomorrowDate.toLocaleString());
     const projectIndex = projects.findIndex(
@@ -87,6 +98,7 @@ const TaskNew = ({
     } else {
       setIsChecked(!isChecked);
     }
+    storeData();
   };
 
   const handleCheckBoxClick = (projectId, taskId, event) => {
@@ -108,13 +120,10 @@ const TaskNew = ({
         setProjects(updatedProjects);
       }
     }
-    console.log(today, 'after clicking');
-    if (!today) {
-      setToday(false);
-      console.log(today, tomorrow, 'after setting');
-    }
+    storeData();
   };
 
+  // storeData();
   const handleFileVisible = () => {
     setClicked(false);
   };

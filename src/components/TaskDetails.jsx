@@ -6,7 +6,11 @@ import {
   StyleSheet,
   Text,
   View,
+  // AsyncStorage,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// import SyncStorage from 'sync-storage';
 import Dots from '../common/Dots';
 import DotFile from '../components/DotFile';
 import filterIcon from '../assets/filter-icon.png';
@@ -16,6 +20,25 @@ import TaskNew from './TaskNew';
 import {hp} from '../common/Responsive';
 
 const TaskDetails = ({heading, searchQuery, projects, setProjects, id}) => {
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const value = await AsyncStorage.getItem('today');
+
+        if (value !== null) {
+          console.log('Retrieved value:', value);
+          // Assuming the value retrieved is a boolean, update the 'today' state accordingly
+          setToday(value === 'true'); // Convert string value to boolean
+        } else {
+          console.log('No data with that key!');
+        }
+      } catch (error) {
+        console.log('Error retrieving data:', error);
+      }
+    };
+    getData();
+  }, []);
+
   const [clicked, setClicked] = useState(false);
   const [today, setToday] = useState(true);
   const [tomorrow, setTomorrow] = useState('');

@@ -16,6 +16,15 @@ import hamberger from '../assets/hamberger-menu.png';
 import arrow from '../assets/back-arrow.png';
 import userAvatar from '../assets/user-avatar.png';
 import searchIcon from '../assets/search-icon.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const removeData = async () => {
+  try {
+    await AsyncStorage.removeItem('today'); // Replace '@key' with the key to remove
+    console.log('Data removed successfully!');
+  } catch (error) {
+    console.log('Error removing data:', error);
+  }
+};
 
 const Navbar = ({navigation, searchQuery, setSearchQuery, projects}) => {
   const [isSignOut, setSignOut] = useState(true);
@@ -26,7 +35,7 @@ const Navbar = ({navigation, searchQuery, setSearchQuery, projects}) => {
   useEffect(() => {}, [searchQuery]);
   const signOut = () => {
     Alert.alert(
-      'Delete Project',
+      'Log out',
       `Are you sure you want to logout?`,
       [
         {
@@ -37,6 +46,7 @@ const Navbar = ({navigation, searchQuery, setSearchQuery, projects}) => {
           text: 'Log Out',
           style: 'destructive',
           onPress: () => {
+            removeData();
             navigation.navigate('login');
           },
         },
